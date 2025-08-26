@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
 export default function AuthGuard({ children }: { children: React.ReactNode }) {
-  const { status } = useSession();
+  const { data:session,status } = useSession();
   const router = useRouter();
 
   useEffect(() => {
@@ -21,7 +21,10 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
       </div>
     );
   }
-
-  return <>{children}</>;
+  if(status==="authenticated"){
+      return <>{children}</>;
+  }
+  return null;
+  
 }
 

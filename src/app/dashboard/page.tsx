@@ -19,7 +19,7 @@ export default function Dashboard() {
   const {data:session,status}=useSession();
   const [range, setRange] = useState([
     {
-      startDate: new Date(),
+      startDate: new Date(), 
       endDate: new Date(),
       key: 'selection' as const,
     },
