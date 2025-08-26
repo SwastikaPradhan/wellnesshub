@@ -11,10 +11,12 @@ import HabitCard from "@/components/HabitCard";
 import DailyProgress from "@/components/DailyProgress";
 import MeditationCard from "@/components/MeditationCard";
 import Sidebar from "@/components/Sidebar";
+import {useSession,getSession} from "next-auth/react";
 import axios from "axios";
 
 export default function Dashboard() {
   const [showCalendar, setShowCalendar] = useState(false);
+  const {data:session,status}=useSession();
   const [range, setRange] = useState([
     {
       startDate: new Date(),
@@ -41,7 +43,7 @@ export default function Dashboard() {
           {
             withCredentials: true,
             headers: {
-              Authorization: `Bearer ${localStorage.getItem("token")}`,
+              Authorization: `Bearer ${session?.accessToken}`,
             },
           }
         );
@@ -59,7 +61,7 @@ export default function Dashboard() {
         const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/dashboard/username`, {
           withCredentials: true,
           headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`
+            Authorization: `Bearer ${session?.accessToken}`
           }
         });
         setusername(res.data.username);
