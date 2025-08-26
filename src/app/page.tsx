@@ -5,13 +5,24 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Check } from "lucide-react";
+import {useEffect,useState} from "react";
 
 export default function HomePage() {
   const { data: session } = useSession();
   const router = useRouter();
+  const [token,setToken]=useState<string | null>(null);
+  useEffect(()=>{
+    if(typeof window !=="undefined"){
+      const storedtoken=localStorage.getItem("token");
+      setToken(storedtoken);
+    }
+  });
 
   const handleConnect = async () => {
-    const token = localStorage.getItem("token");
+    if(!token){
+      alert("Please login First");
+      return;
+    }
     try {
       // request to Google Fit API 
       const res = await fetch(

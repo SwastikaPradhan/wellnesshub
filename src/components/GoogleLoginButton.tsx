@@ -2,6 +2,7 @@
 import { GoogleLogin } from '@react-oauth/google';
 import {jwtDecode} from 'jwt-decode';
 import axios from 'axios';
+import {useState,useEffect} from "react";
 import { useRouter } from "next/navigation";
 
 interface GoogleTokenPayload {
@@ -11,7 +12,16 @@ interface GoogleTokenPayload {
 }
 
 export default function GoogleLoginButton() {
-    const router=useRouter();
+  const router=useRouter();
+  const [tokenFromApi,setTokenFromApi]=useState<string | null>(null);
+    useEffect(()=>{
+        if(tokenFromApi){
+           localStorage.setItem('token', tokenFromApi);
+
+        }
+      },[tokenFromApi]);
+     
+
   const handleLogin = async (credentialResponse: any) => {
     if (!credentialResponse.credential) return;
 
@@ -27,8 +37,8 @@ export default function GoogleLoginButton() {
 
       console.log('Login Success', data);
 
-      // Save token locally
-      localStorage.setItem('token', data.token);
+      
+    
       router.push('/');
     } catch (err) {
       console.error('Login Failed', err);

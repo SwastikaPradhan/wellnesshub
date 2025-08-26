@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useState } from "react";
+import { useState ,useEffect} from "react";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -14,6 +14,12 @@ export default function LogActivity() {
     intensity: ""
   });
   const [showActivityHeading, setShowActivityHeading] = useState(false);
+  const [token,setToken]=useState<string | null>(null);
+
+  useEffect(()=>{
+    const storedToken=localStorage.getItem('token');
+    setToken(storedToken);
+  },[]);
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
@@ -28,7 +34,7 @@ export default function LogActivity() {
   const handleActivityFocus = () => {
     setShowActivityHeading(true);
   };
-  const token =localStorage.getItem('token');
+  
 
   const handleSubmit = async(e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();

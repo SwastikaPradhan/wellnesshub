@@ -19,6 +19,7 @@ export default function DailyJournal() {
   const [image, setImage] = useState<File | null>(null);
   const [ImageUrl,setImageUrl]= useState<String | null>(null);
   const[refreshKey,setRefreshKey]=useState(0);
+  const [token,setToken]=useState<string |null>(null);
 
   const moods = ["Happy", "Content", "Neutral", "Sad", "Anxious"];
   const topics = ["Relationships", "Work", "Health", "Hobbies", "Personal Growth"];
@@ -34,6 +35,10 @@ export default function DailyJournal() {
       }
     };
     getUser();
+    if(typeof window !== "undefined"){
+      const storedToken=localStorage.getItem('token');
+      setToken(storedToken);
+    }
   }, []);
 
   const handleSave = async () => {
@@ -41,7 +46,6 @@ export default function DailyJournal() {
     alert("Don't be lazy! Fill out all the fields 😛");
     return;
   }
-  const token = localStorage.getItem('token');
 
   try {
     const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/journal/create`, {
