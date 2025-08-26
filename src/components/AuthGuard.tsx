@@ -1,28 +1,27 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { useRouter, usePathname } from 'next/navigation';
-import { account } from '@/lib/appwrite';
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 
 export default function AuthGuard({ children }: { children: React.ReactNode }) {
-  const [loading, setLoading] = useState(true);
+  const { status } = useSession();
   const router = useRouter();
-  const pathname = usePathname();
 
   useEffect(() => {
-    const checkUser = async () => {
-      try {
-        await account.get(); // checks if user is logged in
-        setLoading(false);
-      } catch {
-        router.push(`/signup?redirect=${pathname}`); // redirect to signup with redirect URL
-      }
-    };
+    if (status === "unauthenticated") {
+      router.push("/signup");
+    }
+  }, [status, router]);
 
-    checkUser();
-  }, [pathname, router]);
-
-  if (loading) return <div className="flex justify-center items-center h-screen">Loading...</div>;
+  if (status === "loading") {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        Loading...
+      </div>
+    );
+  }
 
   return <>{children}</>;
 }
+
