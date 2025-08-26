@@ -1,7 +1,7 @@
-import NextAuth, { Account, Profile, Session, User } from "next-auth";
+import NextAuth, { Account, Session } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 
-async function refreshAccessToken(refreshToken: string) {
+async function refreshAccessToken(refreshToken: string, token: any) {
   try {
     const res = await fetch("https://oauth2.googleapis.com/token", {
       method: "POST",
@@ -19,16 +19,16 @@ async function refreshAccessToken(refreshToken: string) {
     if (!res.ok) throw refreshedTokens;
 
     return {
+      ...token,
       accessToken: refreshedTokens.access_token,
-      refreshToken: refreshedTokens.refresh_token ?? refreshToken, // fallback to old one
+      refreshToken: refreshedTokens.refresh_token ?? token.refreshToken,
       expiresAt: Date.now() + refreshedTokens.expires_in * 1000,
     };
   } catch (error) {
     console.error("Error refreshing access token:", error);
     return {
-      accessToken: "",
-      refreshToken: refreshToken,
-      expiresAt: 0,
+      ...token,
+      error: "RefreshAccessTokenError",
     };
   }
 }
@@ -40,11 +40,7 @@ const handler = NextAuth({
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
       authorization: {
         params: {
-          scope: [
-            "openid",
-            "profile",
-            "email"
-          ].join(" "),
+          scope: "openid profile email",
           access_type: "offline",
           prompt: "consent",
         },
@@ -57,8 +53,8 @@ const handler = NextAuth({
       // On first sign in
       if (account) {
         const expiresIn = (account as Account & { expires_in?: number }).expires_in ?? 3600;
-        token.accessToken = account.access_token as string;
-        token.refreshToken = account.refresh_token as string;
+        token.accessToken = account.access_token;
+        token.refreshToken = account.refresh_token;
         token.expiresAt = Date.now() + expiresIn * 1000;
         return token;
       }
@@ -69,9 +65,16 @@ const handler = NextAuth({
       }
 
       // Refresh token if expired
-      return await refreshAccessToken(token.refreshToken as string);
+      return await refreshAccessToken(token.refreshToken as string, token);
     },
     async session({ session, token }) {
+      session.user = {
+        ...session.user,
+        id: token.sub,
+        email: token.email,
+        name: token.name,
+        
+      };
       session.accessToken = token.accessToken as string;
       return session;
     },
@@ -79,5 +82,4 @@ const handler = NextAuth({
 });
 
 export { handler as GET, handler as POST };
-
 
