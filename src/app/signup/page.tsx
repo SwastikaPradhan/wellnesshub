@@ -77,7 +77,7 @@ const SignUpPage = () => {
       //localStorage.setItem("token", data.token);  //store token in localstorage
       setSuccess('🎉 Welcome to WellBeing Hub.');
       setTimeout(() => {
-        router.push(redirect || '/');
+        router.push(redirect || '/dashboard');
       }, 1500);
     } catch (err: any) {
       setError(err.message || 'Oops. That was not supposed to happen.');
