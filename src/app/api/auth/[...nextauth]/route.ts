@@ -1,5 +1,7 @@
-import NextAuth, { Account, Session } from "next-auth";
+import NextAuth from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
+import CredentialsProvider from "next-auth/providers/credentials";
+import axios from "axios";
 
 async function refreshAccessToken(refreshToken: string, token: any) {
   try {
@@ -13,11 +15,8 @@ async function refreshAccessToken(refreshToken: string, token: any) {
         grant_type: "refresh_token",
       }),
     });
-
     const refreshedTokens = await res.json();
-
     if (!res.ok) throw refreshedTokens;
-
     return {
       ...token,
       accessToken: refreshedTokens.access_token,
@@ -26,60 +25,72 @@ async function refreshAccessToken(refreshToken: string, token: any) {
     };
   } catch (error) {
     console.error("Error refreshing access token:", error);
-    return {
-      ...token,
-      error: "RefreshAccessTokenError",
-    };
+    return { ...token, error: "RefreshAccessTokenError" };
   }
 }
 
-const handler = NextAuth({
+export default NextAuth({
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID!,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
       authorization: {
-        params: {
-          scope: "openid profile email",
-          access_type: "offline",
-          prompt: "consent",
-        },
+        params: { scope: "openid profile email", access_type: "offline", prompt: "consent" },
+      },
+    }),
+    CredentialsProvider({
+      name: "Credentials",
+      credentials: {
+        email: { label: "Email", type: "email" },
+        password: { label: "Password", type: "password" },
+      },
+      async authorize(credentials) {
+        try {
+          const res = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/login`, {
+            email: credentials?.email,
+            password: credentials?.password,
+          });
+          if (res.data.success) return res.data.user;
+          return null;
+        } catch {
+          return null;
+        }
       },
     }),
   ],
   secret: process.env.NEXTAUTH_SECRET,
+  session: { strategy: "jwt", maxAge: 24 * 60 * 60 },
+  jwt: { secret: process.env.NEXTAUTH_SECRET },
   callbacks: {
-    async jwt({ token, account }) {
-      // On first sign in
-      if (account) {
-        const expiresIn = (account as Account & { expires_in?: number }).expires_in ?? 3600;
+    async jwt({ token, account, user }) {
+      if (account && account.provider === "google") {
         token.accessToken = account.access_token;
         token.refreshToken = account.refresh_token;
-        token.expiresAt = Date.now() + expiresIn * 1000;
-        return token;
+        token.expiresAt = Date.now() + ((account as any).expires_in ?? 3600) * 1000;
       }
-
-      // Return previous token if not expired
-      if (Date.now() < (token.expiresAt as number)) {
-        return token;
+      if (user) {
+        token.id = user.id;
+        token.email = user.email;
+        token.name = user.name;
       }
-
-      // Refresh token if expired
-      return await refreshAccessToken(token.refreshToken as string, token);
+      // refresh google token if expired
+      if (token.refreshToken && Date.now() > (token.expiresAt ?? 0)) {
+        return await refreshAccessToken(token.refreshToken, token);
+      }
+      return token;
     },
     async session({ session, token }) {
-      session.user = {
-        ...session.user,
-        id: token.sub,
-        email: token.email,
-        name: token.name,
-        
-      };
-      session.accessToken = token.accessToken as string;
+      session.user = { id: token.id, email: token.email, name: token.name };
+      session.accessToken = token.accessToken;
       return session;
+    },
+  },
+  cookies: {
+    sessionToken: {
+      name: "next-auth.session-token",
+      options: { httpOnly: true, secure: process.env.NODE_ENV === "production", sameSite: "lax", path: "/" },
     },
   },
 });
 
-export { handler as GET, handler as POST };
 

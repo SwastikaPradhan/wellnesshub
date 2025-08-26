@@ -2,6 +2,7 @@
 
 import { useState ,useEffect} from 'react';
 import { useRouter } from 'next/navigation';
+import {signIn} from "next-auth/react";
 import { LiaEyeSolid, LiaEyeSlashSolid } from "react-icons/lia";
 import GoogleLoginButton from '@/components/GoogleLoginButton';
 
@@ -62,7 +63,18 @@ const SignUpPage = () => {
       if (!response.ok) {
         throw new Error(data?.message || 'Failed to sign up.');
       }
-      localStorage.setItem("token", data.token);  //store token in localstorage
+      const signInResult=await signIn("credentials",{
+        redirect:false,
+        email,
+        password,
+
+      })
+      if(signInResult?.error){
+        setError("Login after Signup failed.");
+        return ;
+      }
+
+      //localStorage.setItem("token", data.token);  //store token in localstorage
       setSuccess('🎉 Welcome to WellBeing Hub.');
       setTimeout(() => {
         router.push(redirect || '/');
