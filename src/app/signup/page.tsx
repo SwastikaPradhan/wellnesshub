@@ -1,10 +1,10 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter,useSearchParams } from 'next/navigation';
+import { useState ,useEffect} from 'react';
+import { useRouter } from 'next/navigation';
 import { LiaEyeSolid, LiaEyeSlashSolid } from "react-icons/lia";
 import GoogleLoginButton from '@/components/GoogleLoginButton';
-import { GoogleLogin } from '@react-oauth/google';
+
 
 const SignUpPage = () => {
   const [email, setEmail] = useState('');
@@ -15,9 +15,15 @@ const SignUpPage = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [redirect,setRedirect]=useState<string | null>(null);
   const router = useRouter();
-  const searchParams=useSearchParams();
-  const redirect=searchParams.get("redirect");
+  useEffect(()=>{
+    if(typeof window !== "undefined"){
+      const params=new URLSearchParams(window.location.search);
+      setRedirect(params.get("redirect"));
+    }
+  },[]);
+  
 
   const handleSignUp = async () => {
     setError('');
@@ -120,7 +126,8 @@ const SignUpPage = () => {
 
         <button
           onClick={handleSignUp}
-          className="w-full bg-black text-white p-3 uppercase text-lg font-bold hover:bg-white hover:text-black hover:border-black border-2 transition duration-200"
+          className="w-full bg-black text-white p-3 uppercase text-lg font-bold hover:bg-white
+           hover:text-black hover:border-black border-2 transition duration-200"
         >
           Signup
         </button>
