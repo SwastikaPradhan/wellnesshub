@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { CalendarDays, Smile, Folder } from "lucide-react";
 import Image from "next/image";
-import {storage} from "@/lib/appwrite";
+import {storage} from "@/app/lib/appwrite";
 
 interface Journal {
   image_url?: string;

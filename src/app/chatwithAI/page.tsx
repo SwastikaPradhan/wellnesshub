@@ -21,9 +21,15 @@ export default function ChatWithAI() {
     setLoading(true);
 
     try {
+      const token=localStorage.getItem("token");
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/ai/chat`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          "Authorization":`Bearer ${token}`
+        
+        
+        },
         body: JSON.stringify({ question: userMessage }),
       });
 

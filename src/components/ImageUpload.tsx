@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { IoMdAdd } from "react-icons/io";
 import { RxCross2 } from "react-icons/rx";
-import { ID, storage } from "@/lib/appwrite";
+import { ID, storage } from "@/app/lib/appwrite";
 
 const bucketId = process.env.NEXT_PUBLIC_APPWRITE_BUCKET_ID!;
 const projectId = process.env.NEXT_PUBLIC_APPWRITE_PROJECT_ID!;

@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useState ,useEffect} from "react";
+import { useState } from "react";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -14,12 +14,7 @@ export default function LogActivity() {
     intensity: ""
   });
   const [showActivityHeading, setShowActivityHeading] = useState(false);
-  const [token,setToken]=useState<string | null>(null);
 
-  useEffect(()=>{
-    const storedToken=localStorage.getItem('token');
-    setToken(storedToken);
-  },[]);
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
@@ -38,14 +33,17 @@ export default function LogActivity() {
 
   const handleSubmit = async(e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    const token=localStorage.getItem("token");
     
     try{
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/activity/logactivity`,{
+      const response = await fetch(`/api/activity/logactivity`,{
         method:"POST",
         headers:{"Content-Type":"application/json",
-          Authorization:`Bearer ${token}`
+          "Authorization":`Bearer ${token}`
+          
         },
         body: JSON.stringify(formData),
+        credentials:"include"   //ensure cookies are sent
       });
       if(response.ok){
         toast.success("Activity saved!",{
@@ -81,7 +79,7 @@ export default function LogActivity() {
     <div className="flex h-screen w-screen overflow-hidden">
       {/* Left Side Image */}
       <div className="w-[40%] h-full relative">
-        <Image src="/logActivity.png" alt="Yoga" fill className="object-cover" />
+        <Image src="/logActivity.png" alt="Yoga" fill sizes="40vw" className="object-cover" />
       </div>
 
       {/* Right Side Form */}
@@ -185,7 +183,8 @@ export default function LogActivity() {
             {/* Submit */}
             <button
               type="submit"
-              className="w-full py-5 bg-[#d8d2fd] text-black font-bold rounded-full hover:bg-[#cfc5ff] transition text-lg"
+              className="w-full py-5 bg-[#d8d2fd] text-black font-bold rounded-full
+               hover:bg-[#cfc5ff] transition text-lg"
             >
               Save Activity 🚀
             </button>

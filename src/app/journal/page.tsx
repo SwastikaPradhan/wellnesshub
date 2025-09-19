@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
-import { databases, account, ID ,storage} from "@/lib/appwrite";
+import { databases, account, ID ,storage} from "@/app/lib/appwrite";
 import ImageUpload from "@/components/ImageUpload";
 import MicButton from "@/components/MicButton";
 import { ToastContainer, toast } from "react-toastify"; 

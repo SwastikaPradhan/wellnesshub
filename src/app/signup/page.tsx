@@ -2,7 +2,6 @@
 
 import { useState ,useEffect} from 'react';
 import { useRouter } from 'next/navigation';
-import {signIn} from "next-auth/react";
 import { LiaEyeSolid, LiaEyeSlashSolid } from "react-icons/lia";
 import GoogleLoginButton from '@/components/GoogleLoginButton';
 
@@ -24,7 +23,6 @@ const SignUpPage = () => {
       setRedirect(params.get("redirect"));
     }
   },[]);
-  
 
   const handleSignUp = async () => {
     setError('');
@@ -63,21 +61,10 @@ const SignUpPage = () => {
       if (!response.ok) {
         throw new Error(data?.message || 'Failed to sign up.');
       }
-      const signInResult=await signIn("credentials",{
-        redirect:false,
-        email,
-        password,
-
-      })
-      if(signInResult?.error){
-        setError("Login after Signup failed.");
-        return ;
-      }
-
-      //localStorage.setItem("token", data.token);  //store token in localstorage
+      
       setSuccess('🎉 Welcome to WellBeing Hub.');
       setTimeout(() => {
-        router.push(redirect || '/dashboard');
+        router.push(redirect || '/');
       }, 1500);
     } catch (err: any) {
       setError(err.message || 'Oops. That was not supposed to happen.');
@@ -119,10 +106,9 @@ const SignUpPage = () => {
             {showPassword ? <LiaEyeSlashSolid /> : <LiaEyeSolid />}
           </span>
         </div>
-
         <div className="relative mb-6">
           <input
-            type={showConfirmPassword ? "text" : "password"}
+            type={showConfirmPassword ? "text":"password"}
             placeholder="Confirm your password"
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}

@@ -68,6 +68,7 @@ export default function NutritionTracker() {
       return;
     }
     try {
+      const token=localStorage.getItem('token')
       await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/log/nutrition`, {
         servings,
         intaketime: intakeTime,
@@ -80,7 +81,7 @@ export default function NutritionTracker() {
         },
       }, {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
+          Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
       });

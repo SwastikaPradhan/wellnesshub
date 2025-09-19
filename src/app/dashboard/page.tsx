@@ -11,15 +11,13 @@ import HabitCard from "@/components/HabitCard";
 import DailyProgress from "@/components/DailyProgress";
 import MeditationCard from "@/components/MeditationCard";
 import Sidebar from "@/components/Sidebar";
-import {useSession,getSession} from "next-auth/react";
 import axios from "axios";
-
+  
 export default function Dashboard() {
   const [showCalendar, setShowCalendar] = useState(false);
-  const {data:session,status}=useSession();
   const [range, setRange] = useState([
     {
-      startDate: new Date(), 
+      startDate: new Date(),
       endDate: new Date(),
       key: 'selection' as const,
     },
@@ -37,13 +35,13 @@ export default function Dashboard() {
       try {
         const start = range[0].startDate?.toISOString().split("T")[0];
         const end = range[0].endDate?.toISOString().split("T")[0];
-
+        const token=localStorage.getItem("token")
         const response = await axios.get(
           `${process.env.NEXT_PUBLIC_API_URL}/api/dashboard/nutritiondata`,
           {
             withCredentials: true,
             headers: {
-              Authorization: `Bearer ${session?.accessToken}`,
+              Authorization: `Bearer ${token}`,
             },
           }
         );
@@ -57,11 +55,12 @@ export default function Dashboard() {
   //username
   useEffect(() => {
     const fetchUsername = async () => {
+      const token=localStorage.getItem("token")
       try {
         const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/dashboard/username`, {
           withCredentials: true,
           headers: {
-            Authorization: `Bearer ${session?.accessToken}`
+            Authorization: `Bearer ${token}`
           }
         });
         setusername(res.data.username);

@@ -94,15 +94,7 @@ export default function HomePage() {
             height={900}
             priority
           />
-          <div className="absolute top-[40%] right-[370px] -translate-y-1/2 rounded-tl-3xl 
-          rounded-tr-3xl rounded-bl-3xl rounded-br-none w-[100px] h-[100px] overflow-hidden">
-            <Image
-              src="/chatbotimage.jpg"
-              alt="Robot Assistant"
-              layout="fill"
-              objectFit="contain"
-            />
-          </div>
+          
         </div>
 
         {/* Cards Section */}
