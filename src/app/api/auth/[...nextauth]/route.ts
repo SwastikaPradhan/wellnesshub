@@ -1,42 +1,45 @@
-import CredentialsProvider from "next-auth/providers/credentials";
 import NextAuth from "next-auth";
+import CredentialsProvider from "next-auth/providers/credentials";
 
-const handler= NextAuth({
+const handler = NextAuth({
   providers: [
     CredentialsProvider({
       name: "Credentials",
       credentials: {
         email: { label: "Email", type: "text" },
-        password: { label: "Password", type: "password" }
+        password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
         try {
-          // Call your Express API for login
-          const res = await fetch("http://localhost:5000/api/auth/login", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              email: credentials?.email,
-              password: credentials?.password
-            }),
-          });
+          const res = await fetch(
+            process.env.NEXT_PUBLIC_API_URL + "/api/auth/login",
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                email: credentials?.email,
+                password: credentials?.password,
+              }),
+            }
+          );
 
           const user = await res.json();
 
-          if (res.ok && user) {
-            return user; // <- NextAuth stores this in the session
-          }
+          if (res.ok && user) return user;
           return null;
-        } catch (err) {
-          console.error("Auth error:", err);
+        } catch (error) {
+          console.error("Authorize error:", error);
           return null;
         }
-      }
-    })
+      },
+    }),
   ],
-  session: { strategy: "jwt" }, // you said you removed manual JWT, but NextAuth uses its own session/jwt internally
+  session: { strategy: "jwt" },
   pages: {
     signIn: "/auth/signin",
   },
 });
+
+//  NO "export default" — only named exports
 export { handler as GET, handler as POST };
+
